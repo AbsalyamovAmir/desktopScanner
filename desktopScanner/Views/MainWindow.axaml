@@ -1,0 +1,30 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:viewModels="clr-namespace:desktopScanner.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
+        x:Class="desktopScanner.Views.MainWindow"
+        Title="Software Scanner Agent"
+        d:DataContext="{d:DesignInstance viewModels:MainWindowViewModel}"
+        x:DataType="viewModels:MainWindowViewModel">
+
+    <Design.DataContext>
+        <viewModels:MainWindowViewModel />
+    </Design.DataContext>
+
+    <DockPanel>
+        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" HorizontalAlignment="Center" Margin="10" Spacing="10">
+            <Button Content="Scan Software" Command="{Binding ScanCommand}" 
+                    IsEnabled="{Binding !IsScanning}" />
+            <Button Content="Save Report" Command="{Binding SaveCommand}" 
+                    IsEnabled="{Binding !IsScanning}" />
+        </StackPanel>
+
+        <ProgressBar DockPanel.Dock="Top" IsIndeterminate="True" Height="5" 
+                     IsVisible="{Binding IsScanning}" Margin="0,0,0,10" />
+
+        <TextBox Text="{Binding Report}" IsReadOnly="True" AcceptsReturn="True" 
+                 TextWrapping="Wrap" FontFamily="Consolas, Courier New" />
+    </DockPanel>
+</Window>
