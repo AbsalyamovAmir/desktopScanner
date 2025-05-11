@@ -3,9 +3,9 @@ using Avalonia.Markup.Xaml;
 
 namespace desktopScanner.Views;
 
-public partial class AuthView : UserControl  // Изменено с Window на UserControl
+public partial class MainContentView : UserControl
 {
-    public AuthView()
+    public MainContentView()
     {
         InitializeComponent();
     }

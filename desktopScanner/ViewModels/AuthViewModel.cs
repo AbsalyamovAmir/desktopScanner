@@ -14,11 +14,11 @@ namespace desktopScanner.ViewModels;
 
 public class AuthViewModel : ReactiveObject
 {
-    private string _username = string.Empty;
-    public string Username
+    private string _email = string.Empty;
+    public string Email
     {
-        get => _username;
-        set => this.RaiseAndSetIfChanged(ref _username, value);
+        get => _email;
+        set => this.RaiseAndSetIfChanged(ref _email, value);
     }
 
     private string _password = string.Empty;
@@ -44,8 +44,11 @@ public class AuthViewModel : ReactiveObject
 
     public ReactiveCommand<Unit, Unit> LoginCommand { get; }
 
-    public AuthViewModel()
+    private readonly Window _mainWindow;
+
+    public AuthViewModel(Window mainWindow)
     {
+        _mainWindow = mainWindow;
         LoginCommand = ReactiveCommand.CreateFromTask(Login);
     }
 
@@ -59,7 +62,7 @@ public class AuthViewModel : ReactiveObject
             using var httpClient = new HttpClient();
             var response = await httpClient.PostAsJsonAsync("https://disribprotect.ru/agent-login", new
             {
-                username = Username,
+                email = Email,
                 password = Password
             });
 
@@ -79,9 +82,9 @@ public class AuthViewModel : ReactiveObject
                 return;
             }
 
-            // Сохраняем токен и переходим к главному окну
+            // Сохраняем токен и переключаемся на главный экран
             App.AccessToken = accessToken;
-            ShowMainWindow();
+            ShowMainContent();
         }
         catch (Exception ex)
         {
@@ -93,14 +96,15 @@ public class AuthViewModel : ReactiveObject
         }
     }
 
-    private void ShowMainWindow()
+    private void ShowMainContent()
     {
-        if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        // Создаем и устанавливаем главное содержимое окна
+        var mainContent = new MainContentView
         {
-            desktop.MainWindow = new MainWindow
-            {
-                DataContext = new MainWindowViewModel()
-            };
-        }
+            DataContext = new MainWindowViewModel()
+        };
+        
+        _mainWindow.Content = mainContent;
+        _mainWindow.Title = "Desktop Scanner - Main";
     }
 }

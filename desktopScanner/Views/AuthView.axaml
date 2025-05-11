@@ -1,23 +1,14 @@
-<Window xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:viewModels="clr-namespace:desktopScanner.ViewModels"
-        mc:Ignorable="d"
-        x:Class="desktopScanner.Views.AuthView"
-        Width="400" Height="300"
-        Title="Авторизация"
-        x:DataType="viewModels:AuthViewModel">
-
-    <Design.DataContext>
-        <viewModels:AuthViewModel />
-    </Design.DataContext>
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:viewModels="clr-namespace:desktopScanner.ViewModels"
+             x:Class="desktopScanner.Views.AuthView"
+             x:DataType="viewModels:AuthViewModel">
 
     <StackPanel Margin="20" Spacing="10">
-        <TextBox Watermark="Логин" Text="{Binding Username}" />
+        <TextBox Watermark="Логин" Text="{Binding Email}" />
         <TextBox Watermark="Пароль" Text="{Binding Password}" PasswordChar="*" />
         <Button Content="Войти" Command="{Binding LoginCommand}" />
         <ProgressBar IsIndeterminate="True" IsVisible="{Binding IsLoading}" />
         <TextBlock Text="{Binding ErrorMessage}" Foreground="Red" TextWrapping="Wrap" />
     </StackPanel>
-</Window>
+</UserControl>

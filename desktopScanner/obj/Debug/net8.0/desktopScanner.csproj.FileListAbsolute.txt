@@ -70,3 +70,4 @@ C:\Users\Absal\RiderProjects\desktopScanner\desktopScanner\obj\Debug\net8.0\refi
 C:\Users\Absal\RiderProjects\desktopScanner\desktopScanner\obj\Debug\net8.0\desktopS.831290E5.Up2Date
 C:\Users\Absal\RiderProjects\desktopScanner\desktopScanner\obj\Debug\net8.0\desktopScanner.genruntimeconfig.cache
 C:\Users\Absal\RiderProjects\desktopScanner\desktopScanner\obj\Debug\net8.0\ref\desktopScanner.dll
+C:\Users\Absal\RiderProjects\desktopScanner\desktopScanner\obj\Debug\net8.0\desktopScanner.sourcelink.json
