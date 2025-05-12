@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Net.Http;
 using System.Reactive;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using desktopScanner.Services;
@@ -40,12 +41,25 @@ public class MainWindowViewModel : ReactiveObject
         IsScanning = true;
         try
         {
-            // Добавляем токен в заголовки
-            _httpClient.DefaultRequestHeaders.Authorization = 
-                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", App.AccessToken);
-            
             var scanner = SoftwareScannerFactory.Create();
-            Report = await scanner.GenerateReportAsync();
+            var reportJson = await scanner.GenerateReportAsync();
+
+            
+            byte[] encryptionKey = SHA256.HashData("32-char-encryption-key-here"u8.ToArray());
+
+            var secureChannel = new SecureChannelService(encryptionKey);
+            byte[] encryptedData = await secureChannel.EncryptAndCompressAsync(reportJson);
+
+            // Отправка данных на сервер
+            // _httpClient.DefaultRequestHeaders.Authorization = 
+            //     new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", App.AccessToken);
+
+            var content = new ByteArrayContent(encryptedData);
+
+            var response = await _httpClient.PostAsync("http://localhost:8090/upload-report", content);
+            response.EnsureSuccessStatusCode();
+
+            Report = "Report encrypted, compressed, and sent successfully!";
         }
         catch (Exception ex)
         {
