@@ -39,10 +39,11 @@ public class MainWindowViewModel : ReactiveObject
     private async Task ScanSoftware()
     {
         IsScanning = true;
+        string reportJson = null;
         try
         {
             var scanner = SoftwareScannerFactory.Create();
-            var reportJson = await scanner.GenerateReportAsync();
+            reportJson = await scanner.GenerateReportAsync();
 
             
             byte[] encryptionKey = SHA256.HashData("32-char-encryption-key-here"u8.ToArray());
@@ -56,14 +57,14 @@ public class MainWindowViewModel : ReactiveObject
 
             var content = new ByteArrayContent(encryptedData);
 
-            var response = await _httpClient.PostAsync("http://localhost:8090/upload-report", content);
+            var response = await _httpClient.PostAsync("http://localhost:8080/upload-report", content);
             response.EnsureSuccessStatusCode();
 
-            Report = "Report encrypted, compressed, and sent successfully!";
+            Report = "Report encrypted, compressed, and sent successfully!" + reportJson;
         }
         catch (Exception ex)
         {
-            Report = $"Error: {ex.Message}";
+            Report = $"Error: {ex.Message}\n" + reportJson;
         }
         finally
         {

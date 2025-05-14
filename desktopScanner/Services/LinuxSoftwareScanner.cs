@@ -56,7 +56,7 @@ public class LinuxSoftwareScanner : ISoftwareScanner
                 {
                     Name = parts[1],
                     Version = parts[2],
-                    Publisher = parts[3],
+                    Vendor = parts[3],
                     Architecture = parts.Length > 4 ? parts[4] : string.Empty
                 });
             }
@@ -95,7 +95,7 @@ public class LinuxSoftwareScanner : ISoftwareScanner
                 {
                     Name = parts[0],
                     Version = parts[1],
-                    Publisher = parts[2],
+                    Vendor = parts[2],
                     Architecture = parts[3]
                 });
             }

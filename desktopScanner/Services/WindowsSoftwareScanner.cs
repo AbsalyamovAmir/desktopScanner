@@ -57,7 +57,7 @@ public class WindowsSoftwareScanner : ISoftwareScanner
             {
                 Name = displayName,
                 Version = subkey?.GetValue("DisplayVersion") as string ?? string.Empty,
-                Publisher = subkey?.GetValue("Publisher") as string ?? string.Empty,
+                Vendor = subkey?.GetValue("Publisher") as string ?? string.Empty,
                 InstallDate = installDate,
                 InstallLocation = subkey?.GetValue("InstallLocation") as string ?? string.Empty,
                 Architecture = Environment.Is64BitOperatingSystem ? "64-bit" : "32-bit"
