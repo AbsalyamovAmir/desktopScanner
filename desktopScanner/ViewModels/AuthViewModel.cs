@@ -1,4 +1,6 @@
 using System;
+using System.Diagnostics;
+using System.Management;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Reactive;
@@ -82,8 +84,13 @@ public class AuthViewModel : ReactiveObject
                 return;
             }
 
-            // Сохраняем токен и переключаемся на главный экран
+            // Сохраняем токен
             App.AccessToken = accessToken;
+
+            // Отправляем данные о подключении
+            await SendConnectionData(accessToken);
+
+            // Переключаемся на главный экран
             ShowMainContent();
         }
         catch (Exception ex)
@@ -93,6 +100,113 @@ public class AuthViewModel : ReactiveObject
         finally
         {
             IsLoading = false;
+        }
+    }
+
+    private async Task SendConnectionData(string accessToken)
+    {
+        try
+        {
+            var connectionData = new
+            {
+                hostname = Environment.MachineName,
+                ip = GetLocalIPAddress(),
+                os = Environment.OSVersion.ToString(),
+                uptime = GetSystemUptime(),
+                cpu = GetCpuInfo(),
+                ram = GetTotalMemory(),
+                access_token = accessToken
+            };
+
+            using var httpClient = new HttpClient();
+            var response = await httpClient.PostAsJsonAsync("https://disribprotect.ru/conection", connectionData);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                Console.WriteLine("Не удалось отправить данные о подключении");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Ошибка при отправке данных о подключении: {ex.Message}");
+        }
+    }
+
+    private string GetLocalIPAddress()
+    {
+        try
+        {
+            var host = System.Net.Dns.GetHostEntry(System.Net.Dns.GetHostName());
+            foreach (var ip in host.AddressList)
+            {
+                if (ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+                {
+                    return ip.ToString();
+                }
+            }
+            return "Не определен";
+        }
+        catch
+        {
+            return "Не определен";
+        }
+    }
+
+    private string GetSystemUptime()
+    {
+        try
+        {
+            using (var uptime = new PerformanceCounter("System", "System Up Time"))
+            {
+                uptime.NextValue();
+                TimeSpan uptimeSpan = TimeSpan.FromSeconds(uptime.NextValue());
+                return $"{uptimeSpan.Days}d {uptimeSpan.Hours}h {uptimeSpan.Minutes}m";
+            }
+        }
+        catch
+        {
+            return "Не определен";
+        }
+    }
+
+    private string GetCpuInfo()
+    {
+        try
+        {
+            using (var searcher = new ManagementObjectSearcher("SELECT Name FROM Win32_Processor"))
+            {
+                foreach (var o in searcher.Get())
+                {
+                    var obj = (ManagementObject)o;
+                    return obj["Name"].ToString();
+                }
+            }
+            return "Не определен";
+        }
+        catch
+        {
+            return "Не определен";
+        }
+    }
+
+    private string GetTotalMemory()
+    {
+        try
+        {
+            using (var searcher = new ManagementObjectSearcher("SELECT TotalPhysicalMemory FROM Win32_ComputerSystem"))
+            {
+                foreach (ManagementObject obj in searcher.Get())
+                {
+                    var totalBytes = Convert.ToUInt64(obj["TotalPhysicalMemory"]);
+                    var totalGB = totalBytes / (1024 * 1024 * 1024);
+                    return $"{totalGB} GB";
+                }
+            }
+            return "Не определен";
+        }
+        catch
+        {
+            return "Не определен";
         }
     }
 

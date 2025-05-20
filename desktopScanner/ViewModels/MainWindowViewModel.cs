@@ -57,7 +57,9 @@ public class MainWindowViewModel : ReactiveObject
 
             var content = new ByteArrayContent(encryptedData);
 
-            var response = await _httpClient.PostAsync("http://localhost:8080/upload-report", content);
+            string ipIlya = "http://192.168.1.153:8080/upload-report";
+            string ipLocalhost = "http://localhost:8080/upload-report";
+            var response = await _httpClient.PostAsync(ipIlya, content);
             response.EnsureSuccessStatusCode();
 
             Report = "Report encrypted, compressed, and sent successfully!" + reportJson;
