@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Reactive;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
+using System.Xml;
 using Avalonia.Controls;
 using desktopScanner.Services;
 using ReactiveUI;
@@ -57,9 +58,9 @@ public class MainWindowViewModel : ReactiveObject
 
             var content = new ByteArrayContent(encryptedData);
 
-            string ipIlya = "http://192.168.1.153:8080/upload-report";
+            string ipIlya = LoadConfiguration() + "/upload-report";
             string ipLocalhost = "http://localhost:8080/upload-report";
-            var response = await _httpClient.PostAsync(ipIlya, content);
+            var response = await _httpClient.PostAsync(ipLocalhost, content);
             response.EnsureSuccessStatusCode();
 
             Report = "Report encrypted, compressed, and sent successfully!" + reportJson;
@@ -101,5 +102,28 @@ public class MainWindowViewModel : ReactiveObject
                 Report = $"Error saving file: {ex.Message}\n" + Report;
             }
         }
+    }
+    
+    private string? LoadConfiguration()
+    {
+        string configPath = Path.Combine(AppContext.BaseDirectory, "config.xml");
+    
+        if (File.Exists(configPath))
+        {
+            try
+            {
+                var xmlDoc = new XmlDocument();
+                xmlDoc.Load(configPath);
+
+                return xmlDoc.SelectSingleNode("environment/server")?.InnerText;
+            }
+            catch (Exception ex)
+            {
+                // Логирование ошибки
+                Console.WriteLine($"Config load error: {ex.Message}");
+                return null;
+            }
+        }
+        return null;
     }
 }

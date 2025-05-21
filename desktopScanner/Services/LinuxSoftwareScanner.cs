@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using desktopScanner.models;
@@ -106,7 +107,139 @@ public class LinuxSoftwareScanner : ISoftwareScanner
 
     public async Task<string> GenerateReportAsync()
     {
-        var software = await GetInstalledSoftwareAsync();
-        return JsonSerializer.Serialize(software, new JsonSerializerOptions { WriteIndented = true });
+        var report = new
+        {
+            SystemInfo = GetLinuxSystemInfo(),
+            InstalledSoftware = await GetInstalledSoftwareAsync()
+        };
+
+        return JsonSerializer.Serialize(report, new JsonSerializerOptions 
+        { 
+            WriteIndented = true,
+            Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+        });
+    }
+
+    private Dictionary<string, string> GetLinuxSystemInfo()
+    {
+        var systemInfo = new Dictionary<string, string>();
+
+        try
+        {
+            // Базовая информация через Environment
+            systemInfo["MachineName"] = Environment.MachineName;
+            systemInfo["UserName"] = Environment.UserName;
+            systemInfo["OSVersion"] = Environment.OSVersion.VersionString;
+            systemInfo["BitOS"] = Environment.Is64BitOperatingSystem ? "64" : "32";
+            systemInfo["RuntimeVersion"] = Environment.Version.ToString();
+
+            // Получаем информацию о дистрибутиве Linux
+            if (File.Exists("/etc/os-release"))
+            {
+                var osRelease = File.ReadAllLines("/etc/os-release");
+                foreach (var line in osRelease)
+                {
+                    if (line.StartsWith("PRETTY_NAME="))
+                    {
+                        systemInfo["OSName"] = line.Split('=')[1].Trim('"');
+                    }
+                    else if (line.StartsWith("VERSION_ID="))
+                    {
+                        systemInfo["OSVersionId"] = line.Split('=')[1].Trim('"');
+                    }
+                }
+            }
+
+            // Информация о процессоре
+            if (File.Exists("/proc/cpuinfo"))
+            {
+                var cpuInfo = File.ReadAllText("/proc/cpuinfo");
+                var modelName = cpuInfo.Split('\n')
+                    .FirstOrDefault(line => line.StartsWith("model name"))?
+                    .Split(':')[1]
+                    .Trim();
+
+                if (!string.IsNullOrEmpty(modelName))
+                {
+                    systemInfo["Processor"] = modelName;
+                }
+
+                var cores = cpuInfo.Split('\n')
+                    .Count(line => line.StartsWith("processor"));
+                
+                if (cores > 0)
+                {
+                    systemInfo["ProcessorCores"] = cores.ToString();
+                }
+            }
+
+            // Информация о памяти
+            if (File.Exists("/proc/meminfo"))
+            {
+                var memInfo = File.ReadAllText("/proc/meminfo");
+                var totalMem = memInfo.Split('\n')
+                    .FirstOrDefault(line => line.StartsWith("MemTotal"))?
+                    .Split(':')[1]
+                    .Trim();
+
+                if (!string.IsNullOrEmpty(totalMem))
+                {
+                    systemInfo["TotalMemory"] = totalMem;
+                }
+
+                var freeMem = memInfo.Split('\n')
+                    .FirstOrDefault(line => line.StartsWith("MemFree"))?
+                    .Split(':')[1]
+                    .Trim();
+
+                if (!string.IsNullOrEmpty(freeMem))
+                {
+                    systemInfo["FreeMemory"] = freeMem;
+                }
+            }
+
+            // Информация о дисках
+            var dfProcess = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = "/bin/df",
+                    Arguments = "-h",
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                }
+            };
+
+            dfProcess.Start();
+            var dfOutput = dfProcess.StandardOutput.ReadToEnd();
+            dfProcess.WaitForExit();
+
+            systemInfo["DiskInfo"] = dfOutput;
+
+            // Информация о времени работы системы
+            var uptimeProcess = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = "/usr/bin/uptime",
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                }
+            };
+
+            uptimeProcess.Start();
+            var uptimeOutput = uptimeProcess.StandardOutput.ReadToEnd();
+            uptimeProcess.WaitForExit();
+
+            systemInfo["Uptime"] = uptimeOutput.Trim();
+        }
+        catch (Exception ex)
+        {
+            systemInfo["Error"] = $"Failed to get system info: {ex.Message}";
+        }
+
+        return systemInfo;
     }
 }
