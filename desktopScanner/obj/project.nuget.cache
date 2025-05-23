@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "KGcvbaFilCI=",
+  "dgSpecHash": "MCW0VhhceIQ=",
   "success": true,
   "projectFilePath": "C:\\Users\\Absal\\RiderProjects\\desktopScanner\\desktopScanner\\desktopScanner.csproj",
   "expectedPackageFiles": [
@@ -35,9 +35,15 @@
     "C:\\Users\\Absal\\.nuget\\packages\\skiasharp.nativeassets.webassembly\\2.88.9\\skiasharp.nativeassets.webassembly.2.88.9.nupkg.sha512",
     "C:\\Users\\Absal\\.nuget\\packages\\skiasharp.nativeassets.win32\\2.88.9\\skiasharp.nativeassets.win32.2.88.9.nupkg.sha512",
     "C:\\Users\\Absal\\.nuget\\packages\\splat\\15.1.1\\splat.15.1.1.nupkg.sha512",
+    "C:\\Users\\Absal\\.nuget\\packages\\system.codedom\\10.0.0-preview.4.25258.110\\system.codedom.10.0.0-preview.4.25258.110.nupkg.sha512",
     "C:\\Users\\Absal\\.nuget\\packages\\system.componentmodel.annotations\\5.0.0\\system.componentmodel.annotations.5.0.0.nupkg.sha512",
+    "C:\\Users\\Absal\\.nuget\\packages\\system.configuration.configurationmanager\\10.0.0-preview.4.25258.110\\system.configuration.configurationmanager.10.0.0-preview.4.25258.110.nupkg.sha512",
+    "C:\\Users\\Absal\\.nuget\\packages\\system.diagnostics.eventlog\\10.0.0-preview.4.25258.110\\system.diagnostics.eventlog.10.0.0-preview.4.25258.110.nupkg.sha512",
+    "C:\\Users\\Absal\\.nuget\\packages\\system.diagnostics.performancecounter\\10.0.0-preview.4.25258.110\\system.diagnostics.performancecounter.10.0.0-preview.4.25258.110.nupkg.sha512",
     "C:\\Users\\Absal\\.nuget\\packages\\system.io.pipelines\\8.0.0\\system.io.pipelines.8.0.0.nupkg.sha512",
+    "C:\\Users\\Absal\\.nuget\\packages\\system.management\\10.0.0-preview.4.25258.110\\system.management.10.0.0-preview.4.25258.110.nupkg.sha512",
     "C:\\Users\\Absal\\.nuget\\packages\\system.reactive\\6.0.1\\system.reactive.6.0.1.nupkg.sha512",
+    "C:\\Users\\Absal\\.nuget\\packages\\system.security.cryptography.protecteddata\\10.0.0-preview.4.25258.110\\system.security.cryptography.protecteddata.10.0.0-preview.4.25258.110.nupkg.sha512",
     "C:\\Users\\Absal\\.nuget\\packages\\tmds.dbus.protocol\\0.20.0\\tmds.dbus.protocol.0.20.0.nupkg.sha512"
   ],
   "logs": []

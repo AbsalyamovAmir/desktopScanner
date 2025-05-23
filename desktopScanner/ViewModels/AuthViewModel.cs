@@ -1,14 +1,14 @@
 using System;
 using System.Diagnostics;
 using System.Management;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
+using System.Net.Sockets;
 using System.Reactive;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Controls.ApplicationLifetimes;
 using desktopScanner.Views;
 using ReactiveUI;
 
@@ -17,6 +17,7 @@ namespace desktopScanner.ViewModels;
 public class AuthViewModel : ReactiveObject
 {
     private string _email = string.Empty;
+
     public string Email
     {
         get => _email;
@@ -24,6 +25,7 @@ public class AuthViewModel : ReactiveObject
     }
 
     private string _password = string.Empty;
+
     public string Password
     {
         get => _password;
@@ -31,6 +33,7 @@ public class AuthViewModel : ReactiveObject
     }
 
     private string _errorMessage = string.Empty;
+
     public string ErrorMessage
     {
         get => _errorMessage;
@@ -38,6 +41,7 @@ public class AuthViewModel : ReactiveObject
     }
 
     private bool _isLoading;
+
     public bool IsLoading
     {
         get => _isLoading;
@@ -136,14 +140,15 @@ public class AuthViewModel : ReactiveObject
     {
         try
         {
-            var host = System.Net.Dns.GetHostEntry(System.Net.Dns.GetHostName());
+            var host = Dns.GetHostEntry(Dns.GetHostName());
             foreach (var ip in host.AddressList)
             {
-                if (ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+                if (ip.AddressFamily == AddressFamily.InterNetwork)
                 {
                     return ip.ToString();
                 }
             }
+
             return "Не определен";
         }
         catch
@@ -181,6 +186,7 @@ public class AuthViewModel : ReactiveObject
                     return obj["Name"].ToString();
                 }
             }
+
             return "Не определен";
         }
         catch
@@ -202,6 +208,7 @@ public class AuthViewModel : ReactiveObject
                     return $"{totalGB} GB";
                 }
             }
+
             return "Не определен";
         }
         catch
@@ -217,7 +224,7 @@ public class AuthViewModel : ReactiveObject
         {
             DataContext = new MainWindowViewModel()
         };
-        
+
         _mainWindow.Content = mainContent;
         _mainWindow.Title = "Desktop Scanner - Main";
     }

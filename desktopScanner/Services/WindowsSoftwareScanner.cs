@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Management;
 using System.Text.Encodings.Web;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml;
 using desktopScanner.models;
@@ -32,8 +34,27 @@ public class WindowsSoftwareScanner : ISoftwareScanner
         {
             softwareList.AddRange(GetSoftwareFromRegistry(key));
         }
+        
+        var softwareListTest = new List<InstalledSoftware>();
+        using (var searcher = new ManagementObjectSearcher("SELECT * FROM Win32_Product"))
+        {
+            foreach (var obj in searcher.Get())
+            {
+                var software = new InstalledSoftware
+                {
+                    Name = CleanSoftwareName(obj["Name"].ToString()),
+                    Version = obj["Version"].ToString() ?? string.Empty,
+                    Vendor = string.Empty,
+                };
 
-        return softwareList;
+                softwareList.Add(software);
+            }
+        }
+
+        return softwareList
+            .GroupBy(s => s.Name)
+            .Select(g => g.First())
+            .ToList();
     }
 
     private List<InstalledSoftware> GetSoftwareFromRegistry(RegistryKey? key)
@@ -47,13 +68,13 @@ public class WindowsSoftwareScanner : ISoftwareScanner
             using var subkey = key.OpenSubKey(subkeyName);
             var displayName = subkey?.GetValue("DisplayName") as string;
             if (string.IsNullOrEmpty(displayName)) continue;
-            
+
             string? publisher = subkey?.GetValue("Publisher") as string;
             string? displayVersion = subkey?.GetValue("DisplayVersion") as string;
 
             var software = new InstalledSoftware
             {
-                Name = displayName,
+                Name = CleanSoftwareName(displayName),
                 Version = displayVersion ?? string.Empty,
                 Vendor = publisher ?? string.Empty,
             };
@@ -72,12 +93,12 @@ public class WindowsSoftwareScanner : ISoftwareScanner
             InstalledSoftware = await GetInstalledSoftwareAsync()
         };
 
-        var options = new JsonSerializerOptions 
-        { 
+        var options = new JsonSerializerOptions
+        {
             WriteIndented = true,
             Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
         };
-        
+
         return JsonSerializer.Serialize(report, options);
     }
 
@@ -87,10 +108,10 @@ public class WindowsSoftwareScanner : ISoftwareScanner
 
         try
         {
-            systemInfo["OSName"] = Environment.OSVersion.VersionString;
+            systemInfo["OSName"] = "Windows";
             systemInfo["MachineName"] = LoadConfiguration();
-            systemInfo["OSVersion"] = Environment.Version.ToString();
-            systemInfo["BitOS"] = Environment.Is64BitOperatingSystem ? "64" : "32";
+            systemInfo["OSVersion"] = Environment.OSVersion.Version.Major + " " + Environment.OSVersion.Version.Build;
+            systemInfo["BitOS"] = Environment.Is64BitOperatingSystem ? "64-bit" : "32-bit";
         }
         catch (Exception ex)
         {
@@ -99,11 +120,11 @@ public class WindowsSoftwareScanner : ISoftwareScanner
 
         return systemInfo;
     }
-    
+
     private string? LoadConfiguration()
     {
         string configPath = Path.Combine(AppContext.BaseDirectory, "config.xml");
-    
+
         if (File.Exists(configPath))
         {
             try
@@ -120,6 +141,50 @@ public class WindowsSoftwareScanner : ISoftwareScanner
                 return null;
             }
         }
+
         return null;
+    }
+    
+    private string CleanSoftwareName(string displayName)
+    {
+        // Сохраняем оригинал для специальных случаев
+        string originalName = displayName;
+
+        // Особый случай для Visual C++ - сохраняем архитектуру
+        if (displayName.Contains("Microsoft Visual C++"))
+        {
+            // Удаляем только версию (форматы: 10.0.40219, 14.42.34438)
+            displayName = Regex.Replace(displayName, @"\s*-\s*\d+(\.\d+)+", "");
+            // Удаляем дублирующиеся пробелы
+            displayName = Regex.Replace(displayName, @"\s+", " ").Trim();
+            return displayName;
+        }
+
+        // Общий случай для остальных программ
+        // Удаляем версии (форматы: 1.2.3, v5.0, 2023)
+        displayName = Regex.Replace(displayName, @"\s*(v?\d+(\.\d+)+(-\d+)*)", "");
+
+        // Удаляем архитектуру (кроме случаев, когда она часть названия)
+        if (!displayName.Contains("Visual C++") &&
+            !displayName.Contains("Runtime") &&
+            !displayName.Contains("Redistributable"))
+        {
+            // Изменено: теперь корректно обрабатывает скобки вокруг архитектуры
+            displayName = Regex.Replace(displayName,
+                @"\s*\(?\b(x\d+|arm\d+|64-bit|32-bit|amd64)\b\)?(_[\w-]+)?",
+                "",
+                RegexOptions.IgnoreCase);
+        }
+
+        // Удаляем языковые метки (ru, en-US)
+        displayName = Regex.Replace(displayName, @"\s*\b([a-z]{2}(-[A-Z]{2})?)\b", "", RegexOptions.IgnoreCase);
+
+        // Чистим оставшиеся артефакты
+        displayName = displayName
+            .Replace("()", "")
+            .Replace("  ", " ")
+            .Trim(' ', '-', '(', ')', '™', '®');
+
+        return displayName;
     }
 }

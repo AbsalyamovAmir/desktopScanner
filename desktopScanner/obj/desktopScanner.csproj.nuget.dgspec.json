@@ -66,6 +66,14 @@
             "Avalonia.Themes.Fluent": {
               "target": "Package",
               "version": "[11.2.7, )"
+            },
+            "System.Diagnostics.PerformanceCounter": {
+              "target": "Package",
+              "version": "[10.0.0-preview.4.25258.110, )"
+            },
+            "System.Management": {
+              "target": "Package",
+              "version": "[10.0.0-preview.4.25258.110, )"
             }
           },
           "imports": [
@@ -84,7 +92,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.408/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.409/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

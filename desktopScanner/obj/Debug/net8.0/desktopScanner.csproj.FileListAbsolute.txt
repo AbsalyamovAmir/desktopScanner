@@ -71,3 +71,13 @@ C:\Users\Absal\RiderProjects\desktopScanner\desktopScanner\obj\Debug\net8.0\desk
 C:\Users\Absal\RiderProjects\desktopScanner\desktopScanner\obj\Debug\net8.0\desktopScanner.genruntimeconfig.cache
 C:\Users\Absal\RiderProjects\desktopScanner\desktopScanner\obj\Debug\net8.0\ref\desktopScanner.dll
 C:\Users\Absal\RiderProjects\desktopScanner\desktopScanner\obj\Debug\net8.0\desktopScanner.sourcelink.json
+C:\Users\Absal\RiderProjects\desktopScanner\desktopScanner\bin\Debug\net8.0\System.CodeDom.dll
+C:\Users\Absal\RiderProjects\desktopScanner\desktopScanner\bin\Debug\net8.0\System.Configuration.ConfigurationManager.dll
+C:\Users\Absal\RiderProjects\desktopScanner\desktopScanner\bin\Debug\net8.0\System.Diagnostics.EventLog.dll
+C:\Users\Absal\RiderProjects\desktopScanner\desktopScanner\bin\Debug\net8.0\System.Diagnostics.PerformanceCounter.dll
+C:\Users\Absal\RiderProjects\desktopScanner\desktopScanner\bin\Debug\net8.0\System.Management.dll
+C:\Users\Absal\RiderProjects\desktopScanner\desktopScanner\bin\Debug\net8.0\System.Security.Cryptography.ProtectedData.dll
+C:\Users\Absal\RiderProjects\desktopScanner\desktopScanner\bin\Debug\net8.0\runtimes\win\lib\net8.0\System.Diagnostics.EventLog.Messages.dll
+C:\Users\Absal\RiderProjects\desktopScanner\desktopScanner\bin\Debug\net8.0\runtimes\win\lib\net8.0\System.Diagnostics.EventLog.dll
+C:\Users\Absal\RiderProjects\desktopScanner\desktopScanner\bin\Debug\net8.0\runtimes\win\lib\net8.0\System.Diagnostics.PerformanceCounter.dll
+C:\Users\Absal\RiderProjects\desktopScanner\desktopScanner\bin\Debug\net8.0\runtimes\win\lib\net8.0\System.Management.dll

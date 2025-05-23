@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System.Xml;
 using desktopScanner.models;
 
 namespace desktopScanner.Services;
@@ -57,8 +58,7 @@ public class LinuxSoftwareScanner : ISoftwareScanner
                 {
                     Name = parts[1],
                     Version = parts[2],
-                    Vendor = parts[3],
-                    Architecture = parts.Length > 4 ? parts[4] : string.Empty
+                    Vendor = parts[3]
                 });
             }
         }
@@ -96,8 +96,7 @@ public class LinuxSoftwareScanner : ISoftwareScanner
                 {
                     Name = parts[0],
                     Version = parts[1],
-                    Vendor = parts[2],
-                    Architecture = parts[3]
+                    Vendor = parts[2]
                 });
             }
         }
@@ -127,11 +126,10 @@ public class LinuxSoftwareScanner : ISoftwareScanner
         try
         {
             // Базовая информация через Environment
-            systemInfo["MachineName"] = Environment.MachineName;
-            systemInfo["UserName"] = Environment.UserName;
-            systemInfo["OSVersion"] = Environment.OSVersion.VersionString;
-            systemInfo["BitOS"] = Environment.Is64BitOperatingSystem ? "64" : "32";
-            systemInfo["RuntimeVersion"] = Environment.Version.ToString();
+            systemInfo["OSName"] = Environment.OSVersion.VersionString;
+            systemInfo["MachineName"] = LoadConfiguration();
+            systemInfo["OSVersion"] = Environment.OSVersion.Version.Major + " " + Environment.OSVersion.Version.Build;
+            systemInfo["BitOS"] = Environment.Is64BitOperatingSystem ? "64-bit" : "32-bit";
 
             // Получаем информацию о дистрибутиве Linux
             if (File.Exists("/etc/os-release"))
@@ -241,5 +239,28 @@ public class LinuxSoftwareScanner : ISoftwareScanner
         }
 
         return systemInfo;
+    }
+    
+    private string? LoadConfiguration()
+    {
+        string configPath = Path.Combine(AppContext.BaseDirectory, "config.xml");
+    
+        if (File.Exists(configPath))
+        {
+            try
+            {
+                var xmlDoc = new XmlDocument();
+                xmlDoc.Load(configPath);
+
+                return xmlDoc.SelectSingleNode("environment/pc")?.InnerText;
+            }
+            catch (Exception ex)
+            {
+                // Логирование ошибки
+                Console.WriteLine($"Config load error: {ex.Message}");
+                return null;
+            }
+        }
+        return null;
     }
 }
