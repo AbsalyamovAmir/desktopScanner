@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Net.Http;
 using System.Reactive;
+using System.Reactive.Linq;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 using System.Xml;
@@ -13,8 +14,10 @@ namespace desktopScanner.ViewModels;
 
 public class MainWindowViewModel : ReactiveObject
 {
-    private readonly HttpClient _httpClient = new HttpClient();
+       private readonly HttpClient _httpClient = new HttpClient();
     private string _report = string.Empty;
+    private IDisposable _timerSubscription;
+    
     public string Report
     {
         get => _report;
@@ -35,10 +38,25 @@ public class MainWindowViewModel : ReactiveObject
     {
         ScanCommand = ReactiveCommand.CreateFromTask(ScanSoftware);
         SaveCommand = ReactiveCommand.CreateFromTask(SaveReport);
+        
+        // Запускаем таймер при создании ViewModel
+        StartAutoScanTimer();
+    }
+
+    private void StartAutoScanTimer()
+    {
+        // Таймер будет срабатывать сразу при старте, затем каждые 60 минут
+        _timerSubscription = Observable.Timer(
+            TimeSpan.Zero, 
+            TimeSpan.FromHours(1))
+            .Subscribe(async _ => await ScanSoftware());
     }
 
     private async Task ScanSoftware()
     {
+        // Если уже идет сканирование, пропускаем
+        if (IsScanning) return;
+        
         IsScanning = true;
         string reportJson = null;
         try
@@ -46,15 +64,10 @@ public class MainWindowViewModel : ReactiveObject
             var scanner = SoftwareScannerFactory.Create();
             reportJson = await scanner.GenerateReportAsync();
 
-            
             byte[] encryptionKey = SHA256.HashData("32-char-encryption-key-here"u8.ToArray());
 
             var secureChannel = new SecureChannelService(encryptionKey);
             byte[] encryptedData = await secureChannel.EncryptAndCompressAsync(reportJson);
-
-            // Отправка данных на сервер
-            // _httpClient.DefaultRequestHeaders.Authorization = 
-            //     new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", App.AccessToken);
 
             var content = new ByteArrayContent(encryptedData);
 
@@ -63,7 +76,7 @@ public class MainWindowViewModel : ReactiveObject
             var response = await _httpClient.PostAsync(ipLocalhost, content);
             response.EnsureSuccessStatusCode();
 
-            Report = "Report encrypted, compressed, and sent successfully!" + reportJson;
+            Report = "Report encrypted, compressed, and sent successfully!" + await response.Content.ReadAsStringAsync();
         }
         catch (Exception ex)
         {
