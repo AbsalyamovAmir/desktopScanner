@@ -76,7 +76,7 @@ public class MainWindowViewModel : ReactiveObject
             var response = await _httpClient.PostAsync(ipLocalhost, content);
             response.EnsureSuccessStatusCode();
 
-            Report = "Report encrypted, compressed, and sent successfully!" + await response.Content.ReadAsStringAsync();
+            Report = await response.Content.ReadAsStringAsync();
         }
         catch (Exception ex)
         {
