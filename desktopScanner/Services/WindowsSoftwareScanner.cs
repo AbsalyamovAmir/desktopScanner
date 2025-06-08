@@ -19,36 +19,46 @@ public class WindowsSoftwareScanner : ISoftwareScanner
     public async Task<List<InstalledSoftware>> GetInstalledSoftwareAsync()
     {
         var softwareList = new List<InstalledSoftware>();
-        
+    
         using (var key = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall"))
         {
             softwareList.AddRange(GetSoftwareFromRegistry(key));
         }
-        
+    
         using (var key = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall"))
         {
             softwareList.AddRange(GetSoftwareFromRegistry(key));
         }
-        
+    
         using (var key = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall"))
         {
             softwareList.AddRange(GetSoftwareFromRegistry(key));
         }
-        
-        var softwareListTest = new List<InstalledSoftware>();
-        using (var searcher = new ManagementObjectSearcher("SELECT * FROM Win32_Product"))
+    
+        try
         {
-            foreach (var obj in searcher.Get())
+            using (var searcher = new ManagementObjectSearcher("SELECT * FROM Win32_Product"))
             {
-                var software = new InstalledSoftware
+                foreach (var obj in searcher.Get())
                 {
-                    Name = CleanSoftwareName(obj["Name"].ToString()),
-                    Version = obj["Version"].ToString() ?? string.Empty,
-                    Vendor = string.Empty,
-                };
+                    var name = obj["Name"]?.ToString();
+                    if (string.IsNullOrEmpty(name)) continue;
 
-                softwareList.Add(software);
+                    var software = new InstalledSoftware
+                    {
+                        Name = CleanSoftwareName(name),
+                        Version = obj["Version"]?.ToString() ?? string.Empty,
+                        Vendor = string.Empty,
+                    };
+
+                    softwareList.Add(software);
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            // Log the error if needed
+            Console.WriteLine($"Error querying Win32_Product: {ex.Message}");
         }
 
         return softwareList
